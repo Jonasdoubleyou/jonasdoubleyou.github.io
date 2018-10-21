@@ -34,6 +34,11 @@ strong {
   padding: 10px;
 }
 
+img {
+  max-width: 100%;
+  padding-top: 10px;
+}
+
 .nav > a {
   background-color: white;
   color: black;
@@ -61,4 +66,37 @@ strong {
   float:left;
   padding: 20px;
   text-align: justify;
+}
+
+.project {
+  width: 44%;
+  border: thick solid white;
+  display: inline-block;
+  padding: 20px;
+  margin-bottom: 10px;
+}
+
+.project > h3 {
+  background-color: white;
+  color: black;
+  margin: 0px;
+  padding: 10px;
+  text-align: left;
+}
+
+.highlight {
+  color: black;
+  background-color: white;
+  text-decoration: none;
+  padding: 10px;
+}
+
+.language {
+  color: pink;
+}
+
+@media (max-width: 950px) {
+  .project {
+    width: auto;
+  }
 }
