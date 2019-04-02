@@ -43,12 +43,19 @@ img {
   background-color: white;
   color: black;
   text-decoration: overline;
-  width: 300px;
+  width: 100px;
   max-width: 90%;
   padding: 10px;
   padding-left: 40px;
   padding-right: 40px;
   flex-grow: 1;
+}
+
+#jahon {
+  width: 90%;
+  background-color: #333;
+  color: white;
+  text-decoration: none;
 }
 
 .nav {
