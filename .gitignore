@@ -1,0 +1,13 @@
+# Ignore npm
+node_modules/
+package-lock.json
+
+# Any log files
+**/*.log
+
+# The transpiled JavaScript
+dist/
+
+# Ignore all builds created by build.sh
+build_logs/
+build_out/

@@ -1,0 +1,19 @@
+{
+  "name": "Insta",
+  "version": "1.0.0",
+  "description": "",
+  "main": "null",
+  "scripts": {
+    "build": "webpack"
+  },
+  "author": "Jonas Wilms",
+  "dependencies": {
+    "css-loader": "^0.28.8",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "html-webpack-inline-source-plugin": "0.0.9",
+    "html-webpack-plugin": "^2.30.1",
+    "ts-loader": "^3.2.0",
+    "typescript": "^2.6.2",
+    "webpack": "^3.10.0"
+  }
+}
