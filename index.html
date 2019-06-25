@@ -26,22 +26,21 @@
 
         <h2>Projects</h2>
         <div class="project">
-          <h3>Claim the Unknown</h3>
+          <h3 id="claim">Claim the Unknown</h3>
           <img src="./img/claim_preview.jpg" />
           A multiplayer open-world strategy game for Android, developed in <span class="language">Kotlin</span> (> 15k LOC) on the frontend and <span class="language">Typescript/Nodejs</span> (> 10k LOC) on the backend.
           Developed together with four others, me working as a FullStack programmer.
           The players see each others in realtime, they can design houses and place them on the map, connect them with streets and let workers work on them.
           Ressources are generated at mines and transported to fabrications, workers eat & sleep and get children.<br/><br/>
 
-          Unfortunately we haven't finished yet as we are all busy with preparing for our final exams.
-          However we are planning to release it as a Beta in ??/2019.
+          The release will be in <p id="claim-release" class="highlight">Xdays</span>
 
           <p>
             See more photos on <a href="https://instagram.com/jahon_dev" class="highlight">Instagram</a>
           </p>
         </div>
         <div class="project">
-          <h3>Macht mit! Niedersachsen</h3>
+          <h3 id="macht-mit">Macht mit! Niedersachsen</h3>
           <img src="./img/macht-mit.png" />
           A small webpage written in <span class="language">TSX</span> using <span class="language">React</span> to motivate people in my home state to talk to their representatives and inform themselves about political topics.
           It was developed as part of my Seminarfach "Computing & Society" together with a friend of mine (She collected all the data and wrote the texts while I developed the Webapp).
@@ -49,7 +48,7 @@
           <a href="https://github.com/jonasdoubleyou/macht-mit/">source</a>
         </div>
         <div class="project">
-          <h3>Vocab</h3>
+          <h3 id="vocab">Vocab</h3>
           <img src="./img/vocab.png" />
           A small WebApp to learn vocabularies written in <span class="language">TSX</span> using <span class="language">React</span>, developed together with <a href="https://github.com/polynomdivision">Alex</a> as part of our CS class.
           <p><a class="highlight" href="https://polynomdivision.github.io/vocab/">GOTO</a></p>
@@ -58,14 +57,14 @@
 
 
 
-        <h2>Papers:</h2>
+        <h2 id="papers">Papers:</h2>
         <p><a href="./papers/Facharbeit - Electronic Voting An opportunity or liability for society.pdf">Facharbeit - Electronic Voting: An opportunity or liability for society?</a></p>
         <p><a href="./papers/Vorfacharbeit - Could and should the criminal justice system be able to bypass iOS security.pdf">Vorfacharbeit - Could and should the criminal justice system be able to bypass iOS security?</a></p>
 
         As I participated a lot on StackOverflow I've written a lot of answers, some of them are worth reading, here are my <a class="highlight" href="https://stackoverflow.com/users/5260024/jonas-wilms?tab=favorites">favourites</a>.
         <br/>
         <br/>
-        <h2>Blog - Random things I'd like to talk about</h2>
+        <h2 id="blog">Blog - Random things I'd like to talk about</h2>
 
         <h3 id="1.0">1.0 - Some honest words from a person often called "clever"</h3>
 
@@ -141,6 +140,11 @@
         }
 
         document.querySelector("#email").addEventListener("click", email, false);
+
+        setInterval(function() {
+          var left = new Date(new Date(2019, 7, 1) - new Date());
+          document.querySelector("#claim-release").innerHTML = left.getMonth() + "months " + left.getDate() + "days " + left.getHours() + "hours " + left.getMinutes() + "minutes " + left.getSeconds() + "seconds";
+}, 1000)
       </script>
   </body>
 </html>
