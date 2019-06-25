@@ -102,6 +102,10 @@ img {
   color: pink;
 }
 
+.hints {
+  font-size: 12px;
+}
+
 @media (max-width: 950px) {
   .project {
     width: auto;
