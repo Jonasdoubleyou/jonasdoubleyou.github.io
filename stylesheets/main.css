@@ -39,6 +39,12 @@ img {
   padding-top: 10px;
 }
 
+code {
+  white-space: pre-wrap;
+  display: block;
+  padding: 10px;
+}
+
 .nav > a {
   background-color: white;
   color: black;
@@ -49,13 +55,6 @@ img {
   padding-left: 40px;
   padding-right: 40px;
   flex-grow: 1;
-}
-
-#jahon {
-  width: 90%;
-  background-color: #333;
-  color: white;
-  text-decoration: none;
 }
 
 .nav {
