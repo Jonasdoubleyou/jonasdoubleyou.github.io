@@ -96,7 +96,7 @@ const contents = [
     },
     {
         search:  ["from"],
-        headline: "I'm from Stade, Nidersachsen, Germany.",
+        headline: "I'm from Stade, Niedersachsen, Germany.",
         content: "That's the reason why I sometimes greet other people with <i>Moin, Moin!</i>",
     },
     {
