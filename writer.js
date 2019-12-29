@@ -106,26 +106,38 @@ const contents = [
     }
 ];
 
+const noContentFound = debounce(() => {
+    setContent("I'm sorry. I don't know the answer.", "Probably it's time to search for it ...");
+}, 3000);
+
 function chooseContent(search) {
     const word = search.slice(search.lastIndexOf(" ") + 1).toLowerCase();
     
     const matches = contents.filter(it => it.search.includes(word));
 
-    if(matches.length !== 1)
+    if(matches.length !== 1) {
+        noContentFound();
         return;
+    }
 
     const match = matches[0];
 
+    noContentFound.cancel();
+    
     setContent(match.headline, match.content);
     
 }
 
-function debounce(fn) {
+function debounce(fn, time = 100) {
     let timer;
-    return function(...args) {
-        clearTimeout(timer);
-        timer = setTimeout(() => fn.apply(this, args), 100);
-    }
+    return Object.assign(
+        function(...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(this, args), time);
+        },
+        { cancel() { clearTimeout(timer); } }
+    );
+
 }
 
 let previous = "";
