@@ -1,17 +1,16 @@
 body {
-  font-family: 'Roboto Condensed', sans-serif;
-  background-color: black;
-  color: white;
-  max-width: 1024px;
+  font-family: 'Courier New', sans-serif;
+  background-color: white;
+  color: black;
   margin: auto;
   padding: 0px;
+  text-align: center;
 }
 
 h1, h2 {
   font-size: 50px;
   text-align: center;
   background-color: white;
-  color: black;
   padding: 10px;
   margin: 0px;
   margin-bottom: 20px;
@@ -24,8 +23,9 @@ h2 {
 }
 
 a {
-  color: white;
-  text-decoration: underline;
+  all: unset;
+  text-decoration: overline;
+  cursor: grab;
 }
 
 strong {
@@ -45,68 +45,32 @@ code {
   padding: 10px;
 }
 
-.nav > a {
-  background-color: white;
-  color: black;
-  text-decoration: overline;
-  width: 100px;
-  max-width: 90%;
-  padding: 10px;
-  padding-left: 40px;
-  padding-right: 40px;
-  flex-grow: 1;
+#question-container {
+  position: fixed;
+  width: 100%;
+  padding-top: 10px;
+  padding-bottom: 40px;
+  height: 40px;
+  bottom: 0;
+  background-color: lightcoral;
+  color: white;
+  font-size: 30px;
 }
 
-.nav {
-  font-size: 25px;
-  width: auto;
-  text-align: center;
-  display: flex;
-  flex-wrap:wrap;
+#question {
+  all: unset;
+  width: 100%;
+  caret-color: lightsalmon;
 }
 
-.content {
-  font-size: 20px;
-  letter-spacing: 1px;
-  line-height: 35px;
-  float:left;
-  padding: 20px;
-  text-align: justify;
+#question::placeholder {
+  color: #ddd;
 }
 
-.project {
-  width: 44%;
-  border: thick solid white;
-  display: inline-block;
-  padding: 20px;
-  margin-bottom: 10px;
+#answer {
+  margin-top: 20%;
+  color: lightcoral;
 }
-
-.project > h3 {
-  background-color: white;
-  color: black;
-  margin: 0px;
-  padding: 10px;
-  text-align: left;
-}
-
-.highlight {
-  color: black;
-  background-color: white;
-  text-decoration: none;
-  padding: 10px;
-}
-
-.language {
-  color: pink;
-}
-
-.hints {
-  font-size: 12px;
-}
-
-@media (max-width: 950px) {
-  .project {
-    width: auto;
-  }
+#headline, #content {
+  transition: all ease 500ms;
 }
