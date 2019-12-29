@@ -2,7 +2,7 @@ body {
   font-family: 'Courier New', sans-serif;
   background-color: white;
   color: black;
-  margin: auto;
+  margin: 0px;
   padding: 0px;
   text-align: center;
 }
@@ -61,6 +61,7 @@ code {
   #question-container {
     height: 20px;
     font-size: 15px;
+    padding-bottom: 10px;
   }
 }
 
@@ -77,6 +78,11 @@ code {
 #answer {
   margin-top: 20%;
   color: lightcoral;
+  width: 80%;
+  padding-left: 10%;
+  padding-right: 10%;
+  overflow: hidden;
+  overflow-wrap: break-word;
 }
 #headline, #content {
   transition: all ease 500ms;
