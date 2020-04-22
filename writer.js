@@ -11,10 +11,21 @@ const random = arr => arr[Math.floor(Math.random() * arr.length)];
 
 let cancelSetContent = () => {};
 
-function setContent({
-    headline: headlineText,
-    content: contentText
-}) {
+const startContent = {
+    headline: "Hi, I'm Jonas!",
+    content: `What do you want to know about me?<br />I mean ...there must be a reason why you are here ...<br /><br /><a href="#V2hhdCdzIHlvdXIgZW1haWw/">email</a>. <a href="#RG8geW91IGJsb2c/" >blog</a>.`,
+    search: [],
+};
+
+let currentContent = startContent;
+
+function setContent(c) {
+    currentContent = c;
+    const {
+        headline: headlineText,
+        content: contentText
+    } = currentContent;
+
     cancelSetContent();
 
     const proceed = (function* () {
@@ -51,10 +62,6 @@ function setContent({
 
 const goto = page => `<a href="#${btoa(page)}">${page}</a>`;
 
-const startContent = {
-    headline: "Hi, I'm Jonas!",
-    content: `What do you want to know about me?<br />I mean ...there must be a reason why you are here ...<br /><br /><a href="#V2hhdCdzIHlvdXIgZW1haWw/">email</a>. <a href="#RG8geW91IGJsb2c/" >blog</a>.`,
-};
 
 const contents = [{
         search: ["age", "old"],
@@ -125,9 +132,9 @@ function chooseContent(search) {
         setContent(startContent);
         return;
     }
-    const word = search.slice(search.lastIndexOf(" ") + 1).toLowerCase().replace(/\?/g, "");
+    const words = search.toLowerCase().replace(/\?/g, "").split(" ");
 
-    const matches = contents.filter(it => it.search.includes(word));
+    const matches = contents.filter(it => words.some(word => it.search.includes(word)));
 
     if (matches.length !== 1) {
         noContentFound();
@@ -136,13 +143,16 @@ function chooseContent(search) {
 
     const match = matches[0];
 
+    if (match === currentContent)
+        return;
+
     noContentFound.cancel();
 
     setContent(match);
 
 }
 
-function debounce(fn, time = 100) {
+function debounce(fn, time = 1000) {
     let timer;
     return Object.assign(
         function (...args) {
@@ -157,14 +167,8 @@ function debounce(fn, time = 100) {
 
 }
 
-let previous = "";
 
-question.addEventListener("input", debounce(() => {
-    if (previous.length < question.value.length || !question.value.trim())
-        chooseContent(question.value)
-
-    previous = question.value;
-}));
+question.addEventListener("input", debounce(() => chooseContent(question.value)));
 
 function fromHash() {
     const start = window.location.hash.slice(1);
