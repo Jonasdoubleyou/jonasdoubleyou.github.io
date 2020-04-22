@@ -2,36 +2,39 @@
 
 
 const question = document.querySelector("#question"),
-      suggestion = document.querySelector("#suggestion"),
-      headline = document.querySelector("#headline"),
-      content = document.querySelector("#content"),
-      answer = document.querySelector("#answer");
+    suggestion = document.querySelector("#suggestion"),
+    headline = document.querySelector("#headline"),
+    content = document.querySelector("#content"),
+    answer = document.querySelector("#answer");
 
 const random = arr => arr[Math.floor(Math.random() * arr.length)];
 
 let cancelSetContent = () => {};
 
-function setContent(headlineText, contentText) {
+function setContent({
+    headline: headlineText,
+    content: contentText
+}) {
     cancelSetContent();
 
     const proceed = (function* () {
         headline.style.paddingTop = "0px";
         content.style.paddingTop = "0px";
-        
+
         headline.style.opacity = 0;
         content.style.opacity = 0;
 
         yield;
 
         headline.innerHTML = headlineText;
-        content.innerHTML = contentText; 
+        content.innerHTML = contentText;
 
         headline.style.paddingTop = "40px";
         content.style.paddingTop = "40px";
 
         answer.style.color = random(["lightcoral", "lightblue", "lightseagreen"]);
 
-        yield; 
+        yield;
 
         headline.style.paddingTop = "20px";
         content.style.paddingTop = "20px";
@@ -48,8 +51,12 @@ function setContent(headlineText, contentText) {
 
 const goto = page => `<a href="#${btoa(page)}">${page}</a>`;
 
-const contents = [
-    {
+const startContent = {
+    headline: "Hi, I'm Jonas!",
+    content: `What do you want to know about me?<br />I mean ...there must be a reason why you are here ...<br /><br /><a href="#V2hhdCdzIHlvdXIgZW1haWw/">email</a>. <a href="#RG8geW91IGJsb2c/" >blog</a>.`,
+};
+
+const contents = [{
         search: ["age", "old"],
         headline: `I'm ${Math.floor((Date.now() - 969487200000) / (1000 * 60 * 60 * 24 * 365))}.`,
         content: "",
@@ -66,7 +73,7 @@ const contents = [
     },
     {
         search: ["email"],
-        headline: (mail => `<a href="mailto:${mail}">${mail}</a>`)(`ajnin.smliw@sanoj`.split``.reverse().join``),
+        headline: (mail => `<a href="mailto:${mail}">${mail}</a>`)(`ajnin.smliw@sanoj`.split ``.reverse().join ``),
         content: "Please only reach out to me if you really need to.<br/> In case you came here from StackOverflow, please use comments to contact me about answers",
     },
     {
@@ -77,7 +84,7 @@ const contents = [
     {
         search: ["instagram", "social", "media", "photography", "photos", "fotos"],
         headline: "I sometimes make photos.",
-        content: `You can find some on <a href="https://instagram.com/the_wilmsinator">Instagram</a>.`, 
+        content: `You can find some on <a href="https://instagram.com/the_wilmsinator">Instagram</a>.`,
     },
     {
         search: ["study", "university"],
@@ -95,27 +102,34 @@ const contents = [
         content: "In case you are passing by, feel free to visit me :)",
     },
     {
-        search:  ["from"],
+        search: ["from"],
         headline: "I'm from Stade, Niedersachsen, Germany.",
         content: "That's the reason why I sometimes greet other people with <i>Moin, Moin!</i>",
     },
     {
         search: ["blog"],
-        headline: `Here it is!`,
-        content: "TO BE WRITTEN",
+        headline: `blog`,
+        content: "<a href='/blog/schmetterling'>Der Schmetterling</a>",
     }
 ];
 
 const noContentFound = debounce(() => {
-    setContent("I'm sorry. I don't know the answer.", "Probably it's time to search for it ...");
+    setContent({
+        headline: "I'm sorry. I don't know the answer.",
+        content: "Probably it's time to search for it ..."
+    });
 }, 3000);
 
 function chooseContent(search) {
-    const word = search.slice(search.lastIndexOf(" ") + 1).toLowerCase();
-    
+    if (!search.trim()) {
+        setContent(startContent);
+        return;
+    }
+    const word = search.slice(search.lastIndexOf(" ") + 1).toLowerCase().replace(/\?/g, "");
+
     const matches = contents.filter(it => it.search.includes(word));
 
-    if(matches.length !== 1) {
+    if (matches.length !== 1) {
         noContentFound();
         return;
     }
@@ -123,19 +137,22 @@ function chooseContent(search) {
     const match = matches[0];
 
     noContentFound.cancel();
-    
-    setContent(match.headline, match.content);
-    
+
+    setContent(match);
+
 }
 
 function debounce(fn, time = 100) {
     let timer;
     return Object.assign(
-        function(...args) {
+        function (...args) {
             clearTimeout(timer);
             timer = setTimeout(() => fn.apply(this, args), time);
-        },
-        { cancel() { clearTimeout(timer); } }
+        }, {
+            cancel() {
+                clearTimeout(timer);
+            }
+        }
     );
 
 }
@@ -143,8 +160,8 @@ function debounce(fn, time = 100) {
 let previous = "";
 
 question.addEventListener("input", debounce(() => {
-    if(previous.length < question.value.length)
-    chooseContent(question.value)
+    if (previous.length < question.value.length || !question.value.trim())
+        chooseContent(question.value)
 
     previous = question.value;
 }));
@@ -152,9 +169,12 @@ question.addEventListener("input", debounce(() => {
 function fromHash() {
     const start = window.location.hash.slice(1);
 
-    if(start) {
+    if (start) {
         question.value = atob(start);
         chooseContent(atob(start));
+    } else {
+        question.value = "";
+        setContent(startContent);
     }
 }
 
