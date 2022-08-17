@@ -116,7 +116,7 @@ const contents = [{
     {
         search: ["blog"],
         headline: `blog`,
-        content: "<a href='/blog/schmetterling'>Der Schmetterling</a>",
+        content: "<a href='/blog/wide-area.html'>Wide Area AirPrint - Printing on remote printers on iOS</a>",
     }
 ];
 

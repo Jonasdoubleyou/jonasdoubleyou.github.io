@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Wide Area AirPrint - Printing on remote printers on iOS</title>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="/stylesheets/blog.css" >
+        <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
+    </head>
+    <body>
+        <header>
+            <h1>Wide Area AirPrint</h1>
+            <h2>Printing on remote printers on iOS</h2>
+        </header>
+        <div class="meta">
+            <div class="meta-author">Jonas Wilms</div>
+            <div class="meta-date">15.08.2022</div>
+        </div>
+        <p>
+            After setting up a remote <a href="http://www.cups.org/">CUPS print server</a> in my dorm's network
+            the question arose how to configure different clients to use it. On Windows the main challenge was to find the right driver 
+            (in the end "Generic > MS Publisher Color Printer" worked) on MacOS setting up the printer was straight forward as printing on MacOS
+            is also based on CUPS. As iOS shares a lot of internals with MacOS it first also seemed straightforward.
+            Unfortunately there is one small difference on iOS: There are no printing settings (for reasons I do not know nor understand). 
+            Instead iOS solely supports printing via "AirPrint printers which magically appear in the printing dialog automatically". 
+            According to Apple one needs an <a href="https://support.apple.com/en-us/HT201387">"AirPrint-enabled printer"</a> to print via iOS,
+            which is not really helpful if one wants to support remote printing in a larger network (on "AirPrint-enabled" printers). 
+            Fortunately <a href="https://en.wikipedia.org/wiki/AirPrint">Wikipedia knows more</a> about AirPrint's technical details,
+            mentioning <i>Bonjour</i>, <i>DNS-SD</i>, <i>Apple Raster</i> and <i>IPP</i> and so does <a href="https://wiki.debian.org/CUPSAirPrint">The Debian Wiki</a>.
+        </p>
+        <h3>IPP</h3>
+        <p>
+            The <a href="https://en.wikipedia.org/wiki/Internet_Printing_Protocol">Internet Printing Protocol</a> (IPP) defines how print clients can talk to printers via 
+            HTTP to manage print jobs. A walk through can be found in the <a href="https://www.pwg.org/ipp/ippguide.html">IPP Guide</a>.
+            When creating a print job, the client can send the file to print in different formats to the server (also called "printing description language" [PDL]). Among the formats are PDF and JPEG,
+            so those can be directly sent to the printer without any conversion step in-between. Given that CUPS is an IPP implementation and all the other operating systems were also already printing via IPP
+            this seemed to be already working just fine. It's also interesting to note that the author of Apple CUPS, Michael R. Sweet is also the secretary of the IPP specification
+            and continues to work on CUPS at the <a href="https://openprinting.github.io/cups/#HISTORY">OpenPrinting fork of CUPS</a>. 
+        </p>
+        <h3>Apple Raster (URF)</h3>
+        <p>
+            According to the OpenPrinting work group's <a href="https://openprinting.github.io/driverless/01-standards-and-their-pdls/">documentation</a>,
+            both "IPP Everywhere" and "AirPrint" specify the use of DNS-SD for printer discovery, IPP for communication and both support PDF and JPEG as PDLs.
+            The only difference between those standards lies in the supported raster format, "IPP Everywhere" uses the open source "PWG raster format" whereas 
+            AirPrint uses "Universal Raster Format (URF)" also called "Apple Raster". Additionally "[URF] is similar to CUPS and PWG Raster but with much simpler page header". 
+            So for a long time CUPS used a different raster format than AirPrint, and Michael R. Sweet noted on <a href="https://github.com/apple/cups/issues/4341">Apple's CUPS issue tracker</a>:
+            "Sorry, but we do not support AirPrint for shared printers served by CUPS.". Interestingly support for URF was added to CUPS for MacOS and iOS via 
+            closed source additions and was never officially supported. Fortunately after Sweet left Apple, <a href="https://github.com/OpenPrinting/cups/pull/126">OpenPrinting CUPS suddenly supported URF and other AirPrint specific IPP attributes</a>.
+            As the printer behind the print server also supports URF it seems that printing URF files via OpenPrinting CUPS also seems to work just fine.
+            Thus although Apple Raster is not publicly documented (neither is AirPrint) it still seems to be supported by CUPS. Therefore if iOS would actually 
+            find the printer and show it, one would also be able to print with iOS.
+        </p>
+        <h3>Bonjour</h3>
+        <p>
+            Bonjour is Apple's implementation of the concept of "zero configuration", based on various standards published by the <a href="http://www.zeroconf.org/">IETF Zeroconf Working Group</a>. 
+            The main idea of Zeroconf is to store configuration information for any kind of service in a tree of DNS records (specified as DNS based Service Discovery (DNS-SD)).
+            In the absence of an authoritative DNS server, each client in a link-local network serves their own services via DNS,
+            and each client then broadcasts to all other clients via multicast DNS (mDNS). Thus when an iPhone (or any other device running Bonjour or another Zeroconf implementation) connects to a network,
+            it broadcasts a DNS request to all devices in the local network (e.g. a printer) and then receives configuration via DNS responses.
+            It then uses the response to request further configuration entries recursively on services it is interested in. 
+
+            Fortunately CUPS also <a href="https://www.cups.org/doc/sharing.html">supports DNS-SD</a> (by setting "Browsing Yes"), 
+            and afterwards the printer magically appeared in iOS devices in the <i>same local network</i>. As each resident in our dorm 
+            has it's own local network and the printers have yet another, this approach didn't quite scale. Fortunately DNS-SD also specifies 
+            a "wide area" mode and a quick search for "wide area bonjour" suggested that Bonjour also supports that.
+
+            Unfortunately though, iOS itself provides no way to debug Bonjour, if something is not quite right the printer simply does not show up in the list of printers.
+            There is an app in the app store though which at least provides some insights into what iOS does (<a href="https://apps.apple.com/de/app/discovery-dns-sd-browser/id305441017">Discovery</a>). 
+            With that the journey began to turn the local DNS-SD service into a wide area service.
+
+            The starting point is the <a href="https://en.wikipedia.org/wiki/Search_domain">search domain</a> which is distributed via DHCP to clients 
+            when the network is set up and which Bonjour uses as the root domain for DNS-SD (let's say it is "example.corp").
+            This is then used by Bonjour (and other DNS-SD clients) to check whether the search domain provides wide area DNS SD.
+            This is generally done by prefixing the search domain with some well-known subdomains,
+            and DNS-SD in local networks works exactly the same but uses the ".local" domain (and broadcasts via mDNS).
+            First the client retrieves a list of domains to use for further DNS-SD queries,
+              which generally is the domain itself (<a href="https://www.rfc-editor.org/rfc/rfc6763.html#section-11">spec</a>).
+    
+        </p>
+        <div class="shell">
+            » dig +short <b>b._dns-sd._udp.</b>example.corp PTR<br>
+            example.corp.
+        </div>
+
+        <p>
+            Specifying that alone didn't work though, iOS simply ignored this domain and did not continue searching.
+            There is another domain used for domain enumeration for "legacy browsing". The specification states:
+            "Sophisticated client applications that care to present choices of
+            domain to the user use the answers learned from the previous four
+            queries to discover the domains to present.  In contrast, many
+            current applications browse without specifying an explicit domain,
+            allowing the operating system to automatically select an
+            appropriate domain on their behalf.  It is for this class of
+            application that the "automatic browsing" query is provided, to
+            allow the network administrator to communicate to the client
+            operating systems which domain(s) should be used automatically for
+            these applications.".
+            Thus after setting the <i>lb._dns-sd._udp.</i> entry, Bonjour started with service type enumeration (<a href="https://www.rfc-editor.org/rfc/rfc6763.html#section-9">spec</a>).
+            Here we're announcing the availability of IPP services. And then provide the concrete IPP services (the printers available on the print server). 
+        </p>
+        <div class="shell">
+            » dig +short <b>lb._dns-sd._udp</b>.example.corp PTR<br>
+            example.corp.<br>
+            <br>
+            » dig +short <b>_services._dns-sd._udp</b>.example.corp PTR<br>
+            _ipp._tcp.example.corp.<br>
+            <br>
+            » dig +short <b>_ipp._tcp</b>.example.corp PTR<br>
+            color._ipp._tcp.example.corp.<br>
+            no-color._ipp._tcp.example.corp.<br>
+        </div>
+
+        <p>
+            As a small side note, we are announcing two different virtual printers "color" and "nocolor", as not all clients provide a reliable way to set the ColorMode,
+            and providing two printers with different settings was the easiest way to provide this across devices. Now unfortunately iOS did not show the printers.
+            A <a href="https://support.apple.com/guide/deployment/airplay-payload-settings-dep5e646123a/1/web/1.0">small note in the Apple documentation</a> provided the missing piece:
+            "AirPrint devices don’t browse for all IPP printers—they browse only for the subset of IPP printers that support Universal Raster Format (URF).". 
+            Thus iOS actually browses the <i>_universal._sub.</i> <a href="https://www.rfc-editor.org/rfc/rfc6763.html#section-7.1">subtype</a> of IPP.
+        </p>
+        <div class="shell">
+            » dig +short <b>_universal._sub</b>._ipp._tcp.example.corp PTR<br>
+            color._ipp._tcp.example.corp.<br>
+            no-color._ipp._tcp.example.corp.<br>
+        </div>
+
+        <p>
+            Now for each of these printers the printers address and port is looked up (which is 631 for IPP) looking up the SRV record,
+            and some basic configuration via the TXT record. These were simply taken over by what CUPS announced locally. 
+            And then magically the printers finally appeared on all Apple devices in the network.
+        </p>
+
+        <div class="shell">
+            » dig +short color._ipp._tcp.example.corp <b>SRV</b><br>
+            0 0 631 print-server.example.corp<br>
+            <br>
+            » dig +short color._ipp._tcp.example.corp <b>TXT</b><br>
+            "txtvers=1" "qtotal=1" "Transparent=T" "URF=none" "rp=printers/color" "note=some description"<br>
+            "product=(GPL Ghostscript)" "printer-state=3" "printer-type=0x234dc"<br>
+            "pdl=application/octet-stream,application/pdf,image/jpeg,image/urf,..."<br>
+        </div>
+    </body>
+    </html>
